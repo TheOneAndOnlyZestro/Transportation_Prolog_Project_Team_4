@@ -21,6 +21,9 @@ group_days(GROUP, Day_Timings):-
 
 day_slots(Group, Week, Day, Slots):-
     findall(S,scheduled_slot(Week, Day, S, _, Group), Slots).
+
+earliest_slot(Group, Week, Day, Slot):-
+    day_slots(Group,Week,Day, [Slot | _]).
 %-------------TRANSPORTATION------------------
 proper_connection_default(A, B, D, L):- 
     connection(A,B, D,L).
