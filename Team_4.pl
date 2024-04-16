@@ -35,8 +35,10 @@ proper_connection_default(A,B, D,L):-
     D is D1 + D2.
     
 proper_connection(A, B, D, L):-
+    connection(_,B,_,L),
     proper_connection_default(A, B, D, L).
 
 proper_connection(A, B, D, L):-
     \+unidirectional(L),
+    connection(_,B,_,L),
     proper_connection_default(B, A, D, L).
