@@ -18,6 +18,9 @@ rem_dupli([H|T],L):-
 group_days(GROUP, Day_Timings):-
     findall(day_timing(Wk,Dy), scheduled_slot(Wk,Dy,_,_,GROUP), D1),
     rem_dupli(D1, Day_Timings),!.
+
+day_slots(Group, Week, Day, Slots):-
+    findall(S,scheduled_slot(Week, Day, S, _, Group), Slots).
 %-------------TRANSPORTATION------------------
 proper_connection_default(A, B, D, L):- 
     connection(A,B, D,L).
