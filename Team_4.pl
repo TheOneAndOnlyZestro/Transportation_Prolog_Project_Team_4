@@ -3,6 +3,22 @@
 % This line MUST be included in the final submission.
 :- ['transport_kb', 'slots_kb'].
 
+%-------------SLOTS---------------------------
+
+rem_dupli([],[]).
+rem_dupli([H|T],L):-
+    member(H, T),
+    rem_dupli(T, L).
+rem_dupli([H|T],L):-
+    \+member(H, T),
+    rem_dupli(T, L1),
+    L = [H|L1].
+    
+
+group_days(GROUP, Day_Timings):-
+    findall(day_timing(Wk,Dy), scheduled_slot(Wk,Dy,_,_,GROUP), D1),
+    rem_dupli(D1, Day_Timings),!.
+%-------------TRANSPORTATION------------------
 proper_connection_default(A, B, D, L):- 
     connection(A,B, D,L).
 
