@@ -42,3 +42,14 @@ proper_connection(A, B, D, L):-
     \+unidirectional(L),
     connection(_,B,_,L),
     proper_connection_default(B, A, D, L).
+
+append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Routes_So_Far, Routes):-
+    proper_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line),
+    last(Routes_So_Far, route(Conn_Line,Source,Conn_Source,Duration)),
+    Z=route(Conn_Line,Source,Conn_Destination,D),
+    D is Duration+Conn_Duration,
+    select(route(Conn_Line,Source,Conn_Source,Duration),Routes_So_Far,Z, Routes).
+append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Routes_So_Far, Routes):-
+    proper_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line),
+    \+last(Routes_So_Far, route(Conn_Line,_,Conn_Source,_)),
+    append(Routes_So_Far, [route(Conn_Line,Conn_Source,Conn_Destination,Conn_Duration)] ,Routes).
