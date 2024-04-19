@@ -71,6 +71,7 @@ connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Dura
     Source \= Destination,
     proper_connection(Intermediate, Destination, D1, L),
     Intermediate \= Source,
+    Intermediate \= Destination,
 
     \+strike(L, Week, Day),
 
@@ -85,7 +86,7 @@ connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Dura
     \+ member(route(_,Destination,Intermediate,_), Prev_Routes),
 
     append_connection(Intermediate, Destination, D1, L, Prev_Routes, Routes),
-    
+    \+ length(Routes,1),
     Duration is D1 +DR.
 
 
