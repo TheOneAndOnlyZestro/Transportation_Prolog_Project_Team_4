@@ -59,26 +59,46 @@ append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Route
 
 
 
-connected(_, _, _, _, 0, _, 0, []).
-connected(_, _, _, _, _, 0, 0, []).
-connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
+connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
+    Source \= Destination,
     proper_connection(Source, Destination, Duration, L),
     \+strike(L, Week, Day),
     Duration < Max_Duration,
-    Max_Routes >= 1,
+    Max_Routes > 0,
     append_connection(Source, Destination, Duration, L, [], Routes).
 
-connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
+connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
+    Source \= Destination,
     proper_connection(Intermediate, Destination, D1, L),
+    Intermediate \= Source,
+
     \+strike(L, Week, Day),
+
     New_Max_Duration is Max_Duration - D1,
     New_Max_Routes is Max_Routes - 1,
     New_Max_Duration >0,
     New_Max_Routes >0,
-    connected(Source, Intermediate, Week, Day, New_Max_Duration, New_Max_Routes, DR, Prev_Routes),
-    append_connection(Intermediate, Destination, D1, L, Prev_Routes, Routes),
-    Duration is D1 +DR.
     
+    connected_default(Source, Intermediate, Week, Day, New_Max_Duration, New_Max_Routes, DR, Prev_Routes),
+
+    \+ member(route(_,Intermediate,Destination,_), Prev_Routes),
+    \+ member(route(_,Destination,Intermediate,_), Prev_Routes),
+
+    append_connection(Intermediate, Destination, D1, L, Prev_Routes, Routes),
+    
+    Duration is D1 +DR.
+
+
+check_if_all_list_is_proper([]).
+check_if_all_list_is_proper([H|T]):-
+    H = route(_,Source,Destination,Duration),
+    proper_connection(Source, Destination, Duration,_),
+    check_if_all_list_is_proper(T).
+
+connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
+    connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes),
+    check_if_all_list_is_proper(Routes).
+
 %-----------------------------TIME-CONVERSIONS----------------------------------
 mins_to_twentyfour_hr(Minutes, TwentyFour_Hours, TwentyFour_Mins):-
     TwentyFour_Hours is Minutes // 60,
