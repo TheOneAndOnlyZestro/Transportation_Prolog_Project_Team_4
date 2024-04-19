@@ -53,3 +53,16 @@ append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Route
     proper_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line),
     \+last(Routes_So_Far, route(Conn_Line,_,Conn_Source,_)),
     append(Routes_So_Far, [route(Conn_Line,Conn_Source,Conn_Destination,Conn_Duration)] ,Routes).
+
+%-----------------------------TIME-CONVERSIONS----------------------------------
+mins_to_twentyfour_hr(Minutes, TwentyFour_Hours, TwentyFour_Mins):-
+    TwentyFour_Hours is Minutes // 60,
+    TwentyFour_Mins is Minutes mod 60.
+
+twentyfour_hr_to_mins(TwentyFour_Hours, TwentyFour_Mins, Minutes):-
+    Minutes is (TwentyFour_Hours*60)+TwentyFour_Mins.
+
+slot_to_mins(Slot_Num, Minutes):-
+    slot(Slot_Num,H,M),
+    twentyfour_hr_to_mins(H,M,Mins),
+    Minutes = Mins.
