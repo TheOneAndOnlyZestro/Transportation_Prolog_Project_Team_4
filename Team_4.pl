@@ -96,9 +96,14 @@ check_if_all_list_is_proper([H|T]):-
     proper_connection(Source, Destination, Duration,_),
     check_if_all_list_is_proper(T).
 
+
+    
+
 connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
     connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes),
-    check_if_all_list_is_proper(Routes).
+    check_if_all_list_is_proper(Routes),
+    \+ (member(route(s41,_,_,_), Routes), member(route(s42,_,_,_), Routes)).
+    
 
 %-----------------------------TIME-CONVERSIONS----------------------------------
 mins_to_twentyfour_hr(Minutes, TwentyFour_Hours, TwentyFour_Mins):-
