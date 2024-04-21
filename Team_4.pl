@@ -86,7 +86,8 @@ connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Dura
     connected_default(Source, Intermediate, Week, Day, New_Max_Duration, New_Max_Routes, DR, Prev_Routes),
 
     append_connection(Intermediate, Destination, D1, L, Prev_Routes, Routes),
-    Duration is D1 +DR.
+    Duration is D1 +DR,
+    \+length(Routes, 1).
 
 connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
     connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes),
