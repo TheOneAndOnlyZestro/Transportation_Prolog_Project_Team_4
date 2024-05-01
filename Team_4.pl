@@ -99,11 +99,22 @@ slot_to_mins(Slot_Num, Minutes):-
     twentyfour_hr_to_mins(H,M,Mins),
     Minutes = Mins.
 
-travel_plan(Home_Stations, Group, Max_Duration, Max_Routes, Journeys):-
-    Home_Stations is [H | T],
-    group_days(Group,Day_Timings(week,day)),
-    earliest_slot(Group,week,day,Slot),
+%Travel_Plan
+travel_plan(Home_Stations, Day_Timings,Group, Max_Duration, Max_Routes, Journeys):-
+    Day_Timings = [day_timing(Week,Day)|Rest],
+    earliest_slot(Group,Week,Day,Slot),
+
+    campus_reachable(Destination),
+    member(H, Home_Stations),
+    connected(H,Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes),
+    travel_plan(Home_Stations, Rest,Group, Max_Duration, Max_Routes, JourneysN),
+    
     slot_to_mins(Slot,Mins),
-    mins_to_twentyfour_hr(mins,start_hr,start_min),
-    Journeys is (week,day,start_hr,start_min,%totalduration,routes),
-    routes is ()
+    Start_Time is Mins - Duration,
+    mins_to_twentyfour_hr(Start_Time, Start_Hour, Start_Minute), 
+    Journeys = [journey(Week, Day, Start_Hour, Start_Minute, Duration, Routes) | JourneysN].
+    
+
+travel_plan([H|T],Group, Max_Duration, Max_Routes, Journeys):-
+    group_days(Group,Day_Timings),
+    findall( Js,travel_plan([H|T], Day_Timings,Group, Max_Duration, Max_Routes, Js),Journeys).
