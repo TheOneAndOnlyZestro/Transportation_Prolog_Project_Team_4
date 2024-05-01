@@ -98,3 +98,12 @@ slot_to_mins(Slot_Num, Minutes):-
     slot(Slot_Num,H,M),
     twentyfour_hr_to_mins(H,M,Mins),
     Minutes = Mins.
+
+travel_plan(Home_Stations, Group, Max_Duration, Max_Routes, Journeys):-
+    Home_Stations is [H | T],
+    group_days(Group,Day_Timings(week,day)),
+    earliest_slot(Group,week,day,Slot),
+    slot_to_mins(Slot,Mins),
+    mins_to_twentyfour_hr(mins,start_hr,start_min),
+    Journeys is (week,day,start_hr,start_min,%totalduration,routes),
+    routes is ()
