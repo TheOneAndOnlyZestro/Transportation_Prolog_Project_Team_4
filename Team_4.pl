@@ -25,25 +25,13 @@ day_slots(Group, Week, Day, Slots):-
 earliest_slot(Group, Week, Day, Slot):-
     day_slots(Group,Week,Day, [Slot | _]).
 %-------------TRANSPORTATION------------------
-proper_connection_default(A, B, D, L):- 
+proper_connection(A, B, D, L):-
     connection(A,B, D,L).
 
-proper_connection_default(A,B, D,L):-
-    \+connection(A,B,D,L),
-    connection(A,C,D1,L),
-    proper_connection_default(C,B,D2,L),
-    D is D1 + D2.
+proper_connection(A, B, D, L):-
+    connection(B,A, D,L),
+    \+unidirectional(L).
     
-proper_connection(A, B, D, L):-
-    connection(A,_,_,L),
-    connection(_,B,_,L),
-    proper_connection_default(A, B, D, L).
-
-proper_connection(A, B, D, L):-
-    connection(B,_,_,L),
-    connection(_,A,_,L),
-    \+unidirectional(L),
-    proper_connection_default(B, A, D, L).
 
 append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Routes_So_Far, Routes):-
     proper_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line),
@@ -56,43 +44,48 @@ append_connection(Conn_Source, Conn_Destination, Conn_Duration, Conn_Line, Route
     \+last(Routes_So_Far, route(Conn_Line, Conn_Destination, Conn_Source,_)),
     Z=route(Conn_Line,Source,Conn_Destination,D),
     D is Duration+Conn_Duration,
-    proper_connection(Source, Conn_Destination, D, Conn_Line),
     select(route(Conn_Line,Source,Conn_Source,Duration),Routes_So_Far,Z, Routes).
 
 
-
-connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
-    Source \= Destination,
+%Connected/10
+connected(Source, Destination, Week, Day, Max_Duration_Current,Max_Duration ,Max_Routes, Duration, Prev_Stations, Routes_So_Far, Routes):-
     proper_connection(Source, Destination, Duration, L),
-    line(L, TYPE),
-    \+strike(TYPE, Week, Day),
-    Duration < Max_Duration,
-    Max_Routes > 0,
-    append_connection(Source, Destination, Duration, L, [], Routes).
-
-connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
-    Source \= Destination,
-    proper_connection(Intermediate, Destination, D1, L),
-    Intermediate \= Source,
-    Intermediate \= Destination,
-    line(L, TYPE),
-    \+strike(TYPE, Week, Day),
-
-    New_Max_Duration is Max_Duration - D1,
-    New_Max_Routes is Max_Routes - 1,
-    New_Max_Duration >0,
-    New_Max_Routes >0,
+    New_Max_Duration_Current is Max_Duration_Current + Duration,
+    New_Max_Duration_Current =< Max_Duration,
     
-    connected_default(Source, Intermediate, Week, Day, New_Max_Duration, New_Max_Routes, DR, Prev_Routes),
+    
+    line(L,TYPE),
+    \+strike(TYPE, Week, Day),
 
-    append_connection(Intermediate, Destination, D1, L, Prev_Routes, Routes),
-    Duration is D1 +DR.
+    \+member(Source, Prev_Stations),
+    
+    append_connection(Source, Destination, Duration, L, Routes_So_Far, Routes),
+    length(Routes, New_Max_Routes_Current),
+    New_Max_Routes_Current =< Max_Routes.
+
+connected(Source, Destination, Week, Day,Max_Duration_Current, Max_Duration, Max_Routes, Duration, Prev_Stations, Routes_So_Far, Routes):-
+    proper_connection(Source, Intermediate, Duration_Conn, L),
+    line(L,TYPE),
+    \+strike(TYPE, Week, Day),
+
+    New_Max_Duration_Current is Max_Duration_Current + Duration_Conn,
+
+    New_Max_Duration_Current =< Max_Duration,
+
+    \+member(Source, Prev_Stations),
+    append(Prev_Stations, [Source], New_Prev_Stations),
+    append_connection(Source, Intermediate, Duration_Conn, L, Routes_So_Far, New_Routes_So_Far),
+
+    length(New_Routes_So_Far, New_Max_Routes_Current),
+    New_Max_Routes_Current =< Max_Routes,
+
+    
+    connected(Intermediate, Destination, Week, Day,New_Max_Duration_Current, Max_Duration, Max_Routes, Duration_Rest, New_Prev_Stations, New_Routes_So_Far, Routes),
+
+    Duration is Duration_Conn + Duration_Rest.
 
 connected(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes):-
-    connected_default(Source, Destination, Week, Day, Max_Duration, Max_Routes, Duration, Routes),
-    \+ (member(route(s41,_,_,_), Routes), member(route(s42,_,_,_), Routes)).
-    
-
+    connected(Source, Destination, Week, Day, 0 ,Max_Duration, Max_Routes, Duration, [Destination], [], Routes).
 %-----------------------------TIME-CONVERSIONS----------------------------------
 mins_to_twentyfour_hr(Minutes, TwentyFour_Hours, TwentyFour_Mins):-
     TwentyFour_Hours is Minutes // 60,
