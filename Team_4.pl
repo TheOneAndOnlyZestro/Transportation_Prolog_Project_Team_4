@@ -100,6 +100,7 @@ slot_to_mins(Slot_Num, Minutes):-
     Minutes = Mins.
 
 %Travel_Plan
+travel_plan(_,[],_,_,_,[]).
 travel_plan(Home_Stations, Day_Timings,Group, Max_Duration, Max_Routes, Journeys):-
     Day_Timings = [day_timing(Week,Day)|Rest],
     earliest_slot(Group,Week,Day,Slot),
@@ -115,6 +116,6 @@ travel_plan(Home_Stations, Day_Timings,Group, Max_Duration, Max_Routes, Journeys
     Journeys = [journey(Week, Day, Start_Hour, Start_Minute, Duration, Routes) | JourneysN].
     
 
-travel_plan([H|T],Group, Max_Duration, Max_Routes, Journeys):-
+travel_plan(Home_Stations,Group, Max_Duration, Max_Routes, Journeys):-
     group_days(Group,Day_Timings),
-    findall( Js,travel_plan([H|T], Day_Timings,Group, Max_Duration, Max_Routes, Js),Journeys).
+    travel_plan(Home_Stations, Day_Timings,Group, Max_Duration, Max_Routes, Journeys).    
